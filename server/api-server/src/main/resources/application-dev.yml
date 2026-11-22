@@ -1,4 +1,7 @@
 spring:
+  output:
+    ansi:
+      enabled: always   # bật màu log trong terminal VS Code
   datasource:
     url: jdbc:postgresql://localhost:5432/linhdienky
     username: ldk
@@ -12,8 +15,6 @@ spring:
     port: 5672
     username: ldk
     password: ldk_dev_password
-  jpa:
-    show-sql: true
 
 app:
   jwt:
@@ -21,3 +22,12 @@ app:
     secret: dev-secret-key-doi-sau-it-nhat-32-ky-tu-1234567890
     access-token-minutes: 30
     refresh-token-days: 7
+
+# Log gọn cho dev: giờ | mức | class | nội dung
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss}){faint} %clr(%5p) %clr(%-25.25logger{0}){cyan} %m%n%wEx"
+  level:
+    root: INFO
+    org.flywaydb: INFO
+    org.hibernate.SQL: DEBUG     # in câu SQL Hibernate chạy

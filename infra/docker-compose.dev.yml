@@ -32,5 +32,15 @@ services:
       - "5672:5672"
       - "15672:15672"   # Giao diện quản lý: http://localhost:15672
 
+  adminer:
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+    ports:
+      - "8081:8080"   # Xem database: http://localhost:8081
+    depends_on:
+      - postgres
+
 volumes:
   pg_data:
