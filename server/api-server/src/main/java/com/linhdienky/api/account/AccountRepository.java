@@ -21,6 +21,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUsernameIgnoreCase(String username);
 
     // TODO: existsByUsernameIgnoreCase -> kiểm tra username đã tồn tại chưa (dùng khi đăng ký)
-
+    boolean existsByUsernameIgnoreCase(String username);
     // TODO: existsByEmailIgnoreCase -> kiểm tra email đã tồn tại chưa (dùng khi đăng ký)
+    boolean existsByEmailIgnoreCase(String email);
 }

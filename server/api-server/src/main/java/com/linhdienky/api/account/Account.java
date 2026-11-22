@@ -33,17 +33,21 @@ public class Account {
     @Column(nullable = false, length = 20)   // NOT NULL, VARCHAR(20)
     private String username;
 
-    // TODO: email -> String, NOT NULL, VARCHAR(255)
+    @Column(nullable = false, length = 255)
+    private String email;
 
-    // TODO: passwordHash -> String, NOT NULL, VARCHAR(60)  (chuỗi BCrypt, KHÔNG phải mật khẩu gốc)
+    @Column(nullable = false, length = 60)
+    private String passwordHash;
 
     // ===== Phân quyền & trạng thái =====
     @Enumerated(EnumType.STRING)              // Lưu chữ "USER"/"ADMIN" thay vì số 0/1
     @Column(nullable = false, length = 10)
     private Role role = Role.USER;            // Mặc định là người chơi thường
 
-    // TODO: status -> kiểu AccountStatus, làm giống "role", mặc định ACTIVE
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private AccountStatus status = AccountStatus.ACTIVE;
+    
     // ===== Thời gian =====
     private Instant lastLoginAt;              // Lần đăng nhập cuối, được phép null
 
@@ -51,5 +55,7 @@ public class Account {
     @Column(nullable = false, updatable = false)  // Không bao giờ bị sửa sau khi tạo
     private Instant createdAt;
 
-    // TODO: updatedAt -> Instant, dùng @UpdateTimestamp (tự cập nhật mỗi lần UPDATE), NOT NULL
+    @UpdateTimestamp                           // Hibernate tự gán lúc UPDATE
+    @Column(nullable = false)                 // Không bao giờ được null
+    private Instant updatedAt;
 }
