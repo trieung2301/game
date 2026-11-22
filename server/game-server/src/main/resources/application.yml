@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: game-server
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ldk
+    password: ldk_dev_password
+
+game:
+  netty:
+    port: 7000
+    boss-threads: 1
+    worker-threads: 0     # 0 = Netty tự chọn theo số CPU
+  tick-rate: 20           # Game loop chạy 20 lần/giây
+
+app:
+  jwt:
+    secret: dev-secret-key-doi-sau-it-nhat-32-ky-tu-1234567890

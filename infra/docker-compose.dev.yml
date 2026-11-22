@@ -1,0 +1,36 @@
+# Chỉ chạy hạ tầng. api-server, game-server, web chạy trực tiếp từ VS Code.
+# Lệnh:  docker compose -f infra/docker-compose.dev.yml up -d
+name: linhdienky-dev
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: linhdienky
+      POSTGRES_USER: ldk
+      POSTGRES_PASSWORD: ldk_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ldk -d linhdienky"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ldk
+      RABBITMQ_DEFAULT_PASS: ldk_dev_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # Giao diện quản lý: http://localhost:15672
+
+volumes:
+  pg_data:

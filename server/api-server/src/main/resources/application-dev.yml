@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/linhdienky
+    username: ldk
+    password: ldk_dev_password
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ldk
+    password: ldk_dev_password
+  jpa:
+    show-sql: true
+
+app:
+  jwt:
+    # Chỉ dùng cho môi trường dev. Prod lấy từ biến môi trường.
+    secret: dev-secret-key-doi-sau-it-nhat-32-ky-tu-1234567890
+    access-token-minutes: 30
+    refresh-token-days: 7

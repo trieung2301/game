@@ -1,0 +1,6 @@
+# Sẽ dùng ở giai đoạn Giám sát
+scrape_configs:
+  - job_name: api-server
+    metrics_path: /api/actuator/prometheus
+    static_configs:
+      - targets: ["api-server:8080"]
