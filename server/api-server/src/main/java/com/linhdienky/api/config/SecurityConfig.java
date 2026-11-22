@@ -2,7 +2,6 @@ package com.linhdienky.api.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linhdienky.api.common.ApiResponse;
-import com.linhdienky.api.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
