@@ -6,14 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * Bắt MỌI lỗi ném ra từ Controller/Service rồi đổi thành JSON ApiResponse.
  * Nhờ vậy Controller không cần viết try/catch.
  *
  * @RestControllerAdvice : áp dụng cho tất cả Controller
- * @ExceptionHandler(X)  : method này xử lý khi có lỗi kiểu X
- * @Slf4j                : Lombok tạo sẵn biến "log" để ghi log
+ *                       @ExceptionHandler(X) : method này xử lý khi có lỗi kiểu
+ *                       X
+ * @Slf4j : Lombok tạo sẵn biến "log" để ghi log
  */
 @Slf4j
 @RestControllerAdvice
@@ -28,9 +30,18 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(code.name(), code.getMessage()));
     }
 
+    /** Trùng dữ liệu do DB chặn (2 người đăng ký cùng lúc cùng username) */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflict(DataIntegrityViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error("DUPLICATE", "Dữ liệu đã tồn tại"));
+    }
+
     /**
      * 2. Lỗi validate (@NotBlank, @Size, @Email... trong Request bị vi phạm).
-     * Lấy thông báo của lỗi ĐẦU TIÊN để trả về, ví dụ: "username: không được để trống"
+     * Lấy thông báo của lỗi ĐẦU TIÊN để trả về, ví dụ: "username: không được để
+     * trống"
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException ex) {
@@ -38,9 +49,6 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .orElse(ErrorCode.VALIDATION_ERROR.getMessage());
-
-        // TODO: trả về HTTP 400 (BAD_REQUEST), body = ApiResponse.error("VALIDATION_ERROR", message)
-        //       Gợi ý: làm giống handleBusiness ở trên
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.name(), message));
