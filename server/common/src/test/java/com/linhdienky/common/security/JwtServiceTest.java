@@ -9,62 +9,64 @@ import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit test cho JwtService.
- *
- * Cấu trúc mỗi test (Arrange - Act - Assert):
- *   1. Chuẩn bị dữ liệu
- *   2. Gọi method cần test
- *   3. Kiểm tra kết quả
- *
- * Chạy:  cd server  ->  mvn -pl common test
- * Hoặc bấm nút ▷ cạnh tên method trong VS Code.
- */
 class JwtServiceTest {
-
-    private static final String SECRET = "test-secret-key-it-nhat-32-ky-tu-1234567890";
-
-    // Đồng hồ giả: luôn chỉ đúng 1 thời điểm cố định
+    private static final String SECRET = "secret-dung-cho-test-dai-hon-32-ky-tu";
     private final Instant now = Instant.parse("2026-01-01T00:00:00Z");
-    private final JwtService jwtService = new JwtService(SECRET, 30, Clock.fixed(now, ZoneOffset.UTC));
+    private final Clock clock = Clock.fixed(now, ZoneOffset.UTC);
+    private final JwtService jwtService = new JwtService(SECRET, 30, clock);
 
     @Test
-    void tokenHopLe_docRaDungAccountIdVaRole() {
-        // Act
+    void tokenHopLe_parseRaDungAccountIdVaRole() {
         String token = jwtService.generateAccessToken(42L, "USER");
         JwtClaims claims = jwtService.parse(token);
 
-        // Assert
         assertEquals(42L, claims.accountId());
         assertEquals("USER", claims.role());
     }
 
     @Test
-    void tokenHetHan_nemLoiExpired() {
+    void tokenHetHan_nemInvalidTokenExceptionReasonExpired() {
         String token = jwtService.generateAccessToken(42L, "USER");
 
-        // Một JwtService khác có đồng hồ chạy nhanh hơn 31 phút -> token đã hết hạn
-        JwtService future = new JwtService(SECRET, 30,
-                Clock.fixed(now.plus(Duration.ofMinutes(31)), ZoneOffset.UTC));
+        Clock laterClock = Clock.fixed(now.plus(Duration.ofMinutes(31)), ZoneOffset.UTC);
+        JwtService laterService = new JwtService(SECRET, 30, laterClock);
 
-        InvalidTokenException ex = assertThrows(InvalidTokenException.class, () -> future.parse(token));
+        InvalidTokenException ex = assertThrows(
+                InvalidTokenException.class,
+                () -> laterService.parse(token)
+        );
         assertEquals(InvalidTokenException.Reason.EXPIRED, ex.getReason());
     }
 
     @Test
-    void tokenBiSua_nemLoiChuKy() {
-        // TODO: tạo token, rồi tạo 1 JwtService khác với SECRET khác (cũng dài >= 32 ký tự)
-        //       parse token bằng service đó -> phải ném InvalidTokenException với Reason.INVALID_SIGNATURE
-        //       Gợi ý: làm giống test tokenHetHan ở trên
+    void tokenKySecretKhac_nemInvalidTokenExceptionReasonInvalidSignature() {
+        String token = jwtService.generateAccessToken(42L, "USER");
+
+        String otherSecret = "secret-khac-dung-cho-test-dai-hon-32-ky-tu";
+        JwtService otherService = new JwtService(otherSecret, 30, clock);
+
+        InvalidTokenException ex = assertThrows(
+                InvalidTokenException.class,
+                () -> otherService.parse(token)
+        );
+        assertEquals(InvalidTokenException.Reason.INVALID_SIGNATURE, ex.getReason());
     }
 
     @Test
-    void tokenSaiDinhDang_nemLoiMalformed() {
-        // TODO: parse chuỗi "abc.def" -> phải ném InvalidTokenException với Reason.MALFORMED
+    void chuoiAbcDef_nemInvalidTokenExceptionReasonMalformed() {
+        InvalidTokenException ex = assertThrows(
+                InvalidTokenException.class,
+                () -> jwtService.parse("abc.def")
+        );
+        assertEquals(InvalidTokenException.Reason.MALFORMED, ex.getReason());
     }
 
     @Test
-    void tokenRong_nemLoiMalformed() {
-        // TODO: parse chuỗi "" -> phải ném InvalidTokenException với Reason.MALFORMED
+    void chuoiRong_nemInvalidTokenExceptionReasonMalformed() {
+        InvalidTokenException ex = assertThrows(
+                InvalidTokenException.class,
+                () -> jwtService.parse("")
+        );
+        assertEquals(InvalidTokenException.Reason.MALFORMED, ex.getReason());
     }
 }
